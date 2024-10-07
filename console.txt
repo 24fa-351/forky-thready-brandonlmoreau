@@ -1,0 +1,25 @@
+pattern 1
+task 0 started 
+task 0 finished 
+task 1 started 
+task 2 started 
+task 1 finished
+task 3 started 
+task 3 finished 
+task 4 started 
+task 2 finished 
+task 4 finished 
+
+
+
+pattern 2
+task 0 started 
+task 0 finished 
+task 1 started 
+task 1 finished 
+task 2 started 
+task 2 finished 
+task 3 started 
+task 3 finished 
+task 4 started 
+task 4 finished 
