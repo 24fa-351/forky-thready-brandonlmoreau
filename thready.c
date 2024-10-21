@@ -1,57 +1,92 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
+#include <unistd.h>     
+#include <sys/types.h>  
+#include <sys/wait.h>   
+#include <time.h>       
 
-
-void process(int iteration)
+int getRandTime(int min, int max)
 {
-      printf("task %d started \n", iteration);
-
-      sleep(1000*((rand() % (8 - 1 + 1)) + 1));
-
-      printf("task %d finished \n", iteration);
-
-}
-void processTwo(int iteration)
-{
-      printf("task %d started \n", iteration);
-
-      sleep(1000*((rand() % (8 - 1 + 1)) + 1));
-      
-      printf("task %d finished \n", iteration);
-
+    int sleepTime = rand() % max + min;
+    return sleepTime;
 }
 
-int main(int argc, char* argv[])
-{
-    int nSize = atoi(argv[1]);
-    int patternChoice = atoi(argv[2]);
+int main(int argc, char *argv[]) {
+    int pattern;
+    int n;
+    pid_t codePID;
+    FILE* file ;
 
-    pid_t *pidsArray = malloc(nSize * sizeof(pid_t));
+    file= fopen("console.txt","w");
+    n = atoi(argv[1]);
+    pattern = atoi(argv[2]);
 
-    if(patternChoice==1)
-    {
-      for (int i = 0; i < nSize; i++)
-      {
-         pidsArray[i]=fork();
-         process(i);
-      }
-      for (int i = 0; i < nSize; i++) {
-        waitpid(pidsArray[i], NULL, 0);
-    }
-    }
-    else
-    {
-{
-      for (int i = 0; i < nSize; i++)
-      {
-         pidsArray[i]=fork();
-         processTwo(i);
-         waitpid(pidsArray[i], NULL, 0);
+    if (pattern == 1) {
+        pid_t child[n];
 
-      }
+        for (int i = 1; i <= n; i++) {
+
+             codePID = fork();
+            
+             int processIteration = i; 
+
+            if ( codePID == 0) {
+                fprintf(file,"starting process #%d  PID#%d\n", processIteration, getpid());
+                sleep(getRandTime(1,8));
+
+                fprintf(file,"ending process #%d  PID#%d\n", processIteration, getpid());
+                fclose(file);
+                return 0;
+            }
+             else 
+            {
+                child[i-1] =  codePID;
+            }
+        }
+
+        for (int i = 0; i < n; i++) 
+        {
+
+            waitpid(child[i], NULL,0);
+        }
+
+    } else if (pattern == 2) {
+        int currentProcess = 1;
+        while (currentProcess <= n) 
+        {
+
+            if (currentProcess < n) 
+            {
+                fprintf(file,"process #%d PID #%d creating new process #%d\n", currentProcess, getpid(), currentProcess + 1);
+                 codePID = fork();
+                if ( codePID == 0) 
+                {
+                    currentProcess++; 
+                    continue; 
+                }
+                 else 
+                {
+                    fprintf(file,"starting process #%d  PID#%d\n", currentProcess, getpid());
+                    sleep(getRandTime(1,8));
+                    wait(NULL);
+
+                    fprintf(file,"ending process #%d  PID#%d\n", currentProcess, getpid());
+                    fclose(file);
+                    return 0;
+                }
+            } 
+            else 
+            {
+                fprintf(file,"starting process #%d  PID#%d\n", currentProcess, getpid());
+                sleep(getRandTime(1,8));
+
+                fprintf(file,"ending process #%d  PID#%d\n", currentProcess, getpid());
+                fclose(file);
+                return 0;
+            }
+        }
     }
-    free(pidsArray);
+              
+    fclose(file);
     return 0;
-}}
+}
